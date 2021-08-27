@@ -1,0 +1,26 @@
+---
+# handlers file for sensu
+- name: enable-rabbitmq
+  service: name=rabbitmq-server arg=defaults enabled=yes
+
+- name: start-rabbitmq
+  service: rabbitmq-server state=starte
+
+- name: enable-redis
+  service: name=redis-server args=defaults enabled=yes
+
+- name: start-redis
+  service: name=redis-server state=started
+
+- name: enable-sensu
+  service: name=sensu-server args=defaults enabled=yes
+
+- name: start-sensu
+  service: name=sensu-server state=started
+
+- name: enable-sensu-api
+  service: name=sensu-api args=defaults enabled=yes
+
+- name: start-sensu-api
+  service: name=sensu-api state=started
+

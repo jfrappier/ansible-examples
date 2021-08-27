@@ -1,0 +1,3 @@
+awssg:
+  - { port: '8061', ip: '172.16.31.1', desc: "abes hosue" }
+

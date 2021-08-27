@@ -1,0 +1,15 @@
+---
+- name: Get erlang deb package
+  get_url: url=http://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb dest=/tmp validate_certs=no
+
+- name: Install erlang repo package
+  apt: deb=/tmp/erlang-solutions_1.0_all.deb
+
+- name: Update apt cache
+  apt: update_cache=yes
+
+- name: Install erlang
+  apt: name=erlang state=present
+
+- name: Cleanup erlang downloads
+  file: path=/tmp/erlang-solutions_1.0_all.deb state=absent

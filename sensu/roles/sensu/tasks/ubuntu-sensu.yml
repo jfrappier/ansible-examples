@@ -1,0 +1,37 @@
+---
+- name: Install sensu public key
+  apt_key: url=http://repos.sensuapp.org/apt/pubkey.gpg state=present
+
+- name: Add official sensu repo
+  copy:
+    src=sensu.list
+    dest=/etc/apt/sources.list.d/
+    backup=yes
+  register: aptrepo
+
+- name: Update apt repos
+  apt: update_cache=yes
+  when: aptrepo.changed
+
+- name: Install sensu
+  apt: name=sensu state=present
+
+- name: Create localhost sensu config file
+  get_url: url=http://sensuapp.org/docs/0.21/files/config.json dest=/etc/sensu validate_certs=no
+
+- name: Create example sensu memory check
+  get_url: url=http://sensuapp.org/docs/0.21/files/check_memory.json dest=/etc/sensu/conf.d validate_certs=no
+
+- name: Create example sensu handler
+  get_url: url=http://sensuapp.org/docs/0.21/files/default_handler.json dest=/etc/sensu/conf.d validate_certs=no
+
+- name: Change sensu file ownership
+  file: path=/etc/sensu owner=sensu group=sensu recurse=yes
+  notify:
+   - enable-sensu
+   - enable-sensu-api
+   - start-sensu
+   - start-sensu-api
+
+- name: Clean up sensu downloads
+  file: path=/tmp/pubkey.gpg state=absent

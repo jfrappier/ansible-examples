@@ -1,0 +1,34 @@
+---
+- name: Install rabbitmq public key
+  apt_key: url=http://www.rabbitmq.com/rabbitmq-signing-key-public.asc state=present
+
+- name: Adding rabbitmq repo
+  copy:
+    src=rabbitmq.list
+    dest=/etc/apt/sources.list.d/
+    backup=yes
+  register: aptrepo
+
+- name: Update apt repos
+  apt: update_cache=yes
+
+- name: Install rabbitmq
+  apt: name=rabbitmq-server state=present
+  notify:
+   - enable-rabbitmq
+   - start-rabbitmq
+
+- name: Add rabbitmq vhost via rabbitmq extra module
+  rabbitmq_vhost: name=/sensu state=present
+
+- name: Add rabbitmq user via rabbitmq extra module
+  rabbitmq_user: user=sensu
+                 password=secret
+                 vhost=/sensu
+                 configure_priv=.*
+                 read_priv=.*
+                 write_priv=.*
+                 state=present
+  
+- name: Cleanup rabbitmq downloads
+  file: path=/tmp/rabbitmq-signing-key-public.asc state=absent

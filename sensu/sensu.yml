@@ -1,0 +1,5 @@
+---
+- hosts: sensu-test
+  sudo: yes
+  roles:
+     - sensu

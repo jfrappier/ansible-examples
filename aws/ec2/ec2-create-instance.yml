@@ -1,0 +1,57 @@
+- hosts: localhost
+  connection: local
+  gather_facts: true
+    
+  tasks:
+    - name: create instance
+      ec2:
+        state: present
+        key_name: jfrap-web2
+        aws_region: us-east-1
+        instance_type: t2.micro
+        image: ami-0922553b7b0369273 #amazon linux ami
+        group: test-web-rules
+        count: 1
+        wait: yes 
+        wait_timeout: 300 
+        vpc_subnet_id: subnet-45ca7519
+        assign_public_ip: yes
+        instance_initiated_shutdown_behavior: stop
+      register: ec2
+
+    - name: add new instance to hosts
+      add_host: 
+        hostname: "{{ item.public_ip }}" 
+        ansible_ssh_private_key_file: ~/.ssh/jfrap-web2
+        ansible_user: "ec2-user"
+        ansible_become: true
+        groupname: awslinux
+      with_items: "{{ ec2.instances }}"
+    
+    - name: create inventory file to reuse
+      copy:
+        dest: inventory
+        content: |
+          [awslinux]
+          "{{ item.public_dns_name }}" ansible_ssh_private_key_file: ~/.ssh/jfrap-web2 ansible_user: "ec2-user"
+      with_items: "{{ ec2.instances }}"
+
+    - name: pause
+      wait_for:
+        timeout=120
+
+- name: Write file for testing
+  hosts: awslinux
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Add epel repo for amazon linux
+      become: true
+      become_method: su
+      shell: sudo amazon-linux-extras install epel
+    - name: update yum repos
+      yum: update_cache=yes
+    - name: install nginx
+      yum:
+        name: nginx
+        state: latest

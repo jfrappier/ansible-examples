@@ -1,0 +1,13 @@
+---
+# tasks file for sensu
+- include: ubuntu-erlang.yml
+  when: ansible_os_family == "Debian"
+
+- include: ubuntu-rabbitmq.yml
+  when: ansible_os_family == "Debian"
+
+- include: ubuntu-redis.yml
+  when: ansible_os_family == "Debian"
+
+- include: ubuntu-sensu.yml
+  when: ansible_os_family == "Debian"

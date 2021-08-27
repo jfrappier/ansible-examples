@@ -1,0 +1,25 @@
+---
+- hosts: varnish
+  remote_user: virtxpert
+  sudo: yes
+
+  tasks:
+  - name: Install apt-transport & curl
+    apt: name=apt-transport-https state=present
+    apt: name=curl state=present
+
+  - name: Get Varnish key
+    apt_key: url=https://repo.varnish-cache.org/ubuntu/GPG-key.txt state=present
+
+  - name: Add Varnish sources to sources.list.d
+    copy:
+      src=varnish-cache.list
+      dest=/etc/apt/sources.list.d/
+      backup=yes
+    register: aptrepo
+
+  - name: Apt Update
+    apt: update_cache=yes
+
+  - name: Install Varnish
+    apt: name=varnish state=present

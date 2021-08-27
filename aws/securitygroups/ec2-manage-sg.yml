@@ -1,0 +1,29 @@
+- hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    awsaccess: "{{ lookup('env','awsaccess') }}"
+    awssecret: "{{ lookup('env','awssecret') }}"
+    awsprireg: "{{ lookup('env','awsprireg') }}" 
+    awsvpc: "{{ lookup('env','awsvpc') }}"
+  tasks:
+  - name: manage/create security group
+    ec2_group:
+      name: batman
+      description: "created by ansible"
+      region: "{{ awsprireg }}"
+      vpc_id: "{{ awsvpc }}"
+      aws_access_key: "{{ awsaccess }}"
+      aws_secret_key: "{{ awssecret }}"
+      purge_rules: false
+      rules:
+        - proto: tcp
+          ports: "{{ item.port }}"
+          cidr_ip: "{{ item.ip }}/32"
+          rule_desc: "{{ item.desc }}"
+      rules_egress:
+        - proto: all
+          cidr_ip: 0.0.0.0/0
+    with_items:
+      - { port: '8060', ip: '192.168.1.1', desc: "jons house" }
+      - { port: '8060', ip: '172.16.31.1', desc: "abes house" }
